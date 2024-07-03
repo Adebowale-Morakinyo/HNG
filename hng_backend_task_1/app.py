@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
-import requests
 import ipinfo
+import pyowm
 
 app = Flask(__name__)
 
+ipinfo_access_token = 'd693024da67f65'
+weather_api_key = 'fa566a26483a061a7b67eb9727cbce9e'
 
-access_token = 'd693024da67f65'
-
-
+ipinfo_handler = ipinfo.getHandler(ipinfo_access_token)
+owm = pyowm.OWM(weather_api_key)
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
@@ -15,12 +16,20 @@ def hello():
     client_ip = request.remote_addr
 
     # Fetch location data
-    location_response = ipinfo.getHandler(access_token)
-    location_data = location_response.getDetails()
-    city = location_data.city
+    location_data = ipinfo_handler.getDetails()
+    city = location_data.city or 'Unknown'
     location = city
 
-    temperature = 11  # Placeholder for temperature fetching logic
+    # Fetch temperature data
+    try:
+        mgr = owm.weather_manager()
+        observation = mgr.weather_at_place(location)
+        weather = observation.weather
+        temperature = weather.temperature('celsius')['temp']
+    except Exception as e:
+        temperature = 'unknown'
+        print(f"Error fetching weather data: {e}")
+
     greeting = f"Hello, {visitor_name}!, the temperature is {temperature} degrees Celcius in {location}"
 
     response = {
@@ -29,7 +38,6 @@ def hello():
         "greeting": greeting
     }
     return jsonify(response)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

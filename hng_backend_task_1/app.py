@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 import requests
+import ipinfo
 
 app = Flask(__name__)
+
+
+access_token = 'd693024da67f65'
+
 
 
 @app.route('/api/hello', methods=['GET'])
@@ -10,9 +15,9 @@ def hello():
     client_ip = request.remote_addr
 
     # Fetch location data
-    location_response = requests.get(f'http://ipinfo.io/{client_ip}/json')
-    location_data = location_response.json()
-    city = location_data.get('city', 'Unknown')
+    location_response = ipinfo.getHandler(access_token)
+    location_data = location_response.getDetails()
+    city = location_data.city
     location = city
 
     temperature = 11  # Placeholder for temperature fetching logic

@@ -10,14 +10,20 @@ weather_api_key = 'fa566a26483a061a7b67eb9727cbce9e'
 ipinfo_handler = ipinfo.getHandler(ipinfo_access_token)
 owm = pyowm.OWM(weather_api_key)
 
+
 @app.route('/api/hello', methods=['GET'])
 def hello():
     visitor_name = request.args.get('visitor_name', 'Guest')
-    client_ip = request.remote_addr
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
 
     # Fetch location data
-    location_data = ipinfo_handler.getDetails(client_ip)
-    city = location_data.city or 'Unknown'
+    try:
+        location_data = ipinfo_handler.getDetails(client_ip)
+        city = getattr(location_data, 'city', 'Unknown')
+    except Exception as e:
+        city = 'Unknown'
+        print(f"Error fetching location data: {e}")
+
     location = city
 
     # Fetch temperature data
@@ -30,7 +36,7 @@ def hello():
         temperature = 'unknown'
         print(f"Error fetching weather data: {e}")
 
-    greeting = f"Hello, {visitor_name}!, the temperature is {temperature} degrees Celcius in {location}"
+    greeting = f"Hello, {visitor_name}!, the temperature is {temperature} degrees Celsius in {location}"
 
     response = {
         "client_ip": client_ip,
@@ -38,6 +44,7 @@ def hello():
         "greeting": greeting
     }
     return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

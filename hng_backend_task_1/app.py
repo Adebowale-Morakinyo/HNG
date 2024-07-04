@@ -16,7 +16,7 @@ def hello():
     client_ip = request.remote_addr
 
     # Fetch location data
-    location_data = ipinfo_handler.getDetails()
+    location_data = ipinfo_handler.getDetails(client_ip)
     city = location_data.city or 'Unknown'
     location = city
 

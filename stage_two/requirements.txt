@@ -1,0 +1,7 @@
+Flask
+Flask-Smorest
+Flask-JWT-Extended
+Flask-SQLAlchemy
+Marshmallow
+python-dotenv
+psycopg2-binary  

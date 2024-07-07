@@ -1,5 +1,6 @@
 import os
 
+
 class Config:
     API_TITLE = "User Authentication & Organisation API"
     API_VERSION = "v1"

@@ -8,7 +8,7 @@ from flask_jwt_extended import (
 from passlib.hash import pbkdf2_sha256
 import uuid
 
-from ..models import UserModel, OrganisationModel
+from ..models import UserModel, OrganisationModel, UserOrganisation
 from ..schemas import UserSchema, UserRegisterSchema, UserLoginSchema
 from ..blocklist import BLOCKLIST
 
@@ -21,7 +21,7 @@ class UserRegister(MethodView):
     @blp.response(201, UserSchema)
     def post(self, user_data):
         if UserModel.find_by_email(user_data["email"]):
-            abort(400, message="A user with that email already exists.")
+            return {"status": "Bad request", "message": "Registration unsuccessful", "statusCode": 400}, 400
 
         user = UserModel(
             userId=str(uuid.uuid4()),
@@ -41,7 +41,25 @@ class UserRegister(MethodView):
         )
         organisation.save_to_db()
 
-        return user
+        # Add user to organisation
+        user_organisation = UserOrganisation(user_id=user.userId, org_id=organisation.orgId)
+        user_organisation.save_to_db()
+
+        access_token = create_access_token(identity=user.userId)
+        return {
+            "status": "success",
+            "message": "Registration successful",
+            "data": {
+                "accessToken": access_token,
+                "user": {
+                    "userId": user.userId,
+                    "firstName": user.firstName,
+                    "lastName": user.lastName,
+                    "email": user.email,
+                    "phone": user.phone,
+                },
+            },
+        }, 201
 
 
 @blp.route("/auth/login")
@@ -51,12 +69,25 @@ class UserLogin(MethodView):
         user = UserModel.find_by_email(user_data["email"])
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             access_token = create_access_token(identity=user.userId)
-            return {"accessToken": access_token}, 200
+            return {
+                "status": "success",
+                "message": "Login successful",
+                "data": {
+                    "accessToken": access_token,
+                    "user": {
+                        "userId": user.userId,
+                        "firstName": user.firstName,
+                        "lastName": user.lastName,
+                        "email": user.email,
+                        "phone": user.phone,
+                    },
+                },
+            }, 200
 
-        abort(401, message="Invalid credentials.")
+        return {"status": "Bad request", "message": "Authentication failed", "statusCode": 401}, 401
 
 
-@blp.route("/api/users/string:user_id")
+@blp.route("/api/users/<string:user_id>")
 class User(MethodView):
     @jwt_required()
     @blp.response(200, UserSchema)
@@ -64,4 +95,14 @@ class User(MethodView):
         user = UserModel.find_by_id(user_id)
         if not user:
             abort(404, message="User not found.")
-        return user
+        return {
+            "status": "success",
+            "message": "User retrieved successfully",
+            "data": {
+                "userId": user.userId,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "email": user.email,
+                "phone": user.phone,
+            }
+        }

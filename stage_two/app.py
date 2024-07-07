@@ -2,11 +2,11 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
-from .db import db
-from .blocklist import BLOCKLIST
-from .resources.user import blp as UserBlueprint
-from .resources.organisation import blp as OrganisationBlueprint
-from .config import Config
+from stage_two.db import db
+from stage_two.blocklist import BLOCKLIST
+from stage_two.resources.user import blp as UserBlueprint
+from stage_two.resources.organisation import blp as OrganisationBlueprint
+from stage_two.config import Config
 
 
 def create_app():

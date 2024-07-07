@@ -8,9 +8,9 @@ from flask_jwt_extended import (
 from passlib.hash import pbkdf2_sha256
 import uuid
 
-from ..models import UserModel, OrganisationModel, UserOrganisation
-from ..schemas import UserSchema, UserRegisterSchema, UserLoginSchema
-from ..blocklist import BLOCKLIST
+from models import UserModel, OrganisationModel, UserOrganisation
+from schemas import UserSchema, UserRegisterSchema, UserLoginSchema
+from blocklist import BLOCKLIST
 
 blp = Blueprint("Users", "users", description="Operations on users")
 

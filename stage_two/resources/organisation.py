@@ -2,8 +2,8 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from ..models import UserModel, OrganisationModel, UserOrganisation
-from ..schemas import OrganisationSchema, AddUserToOrganisationSchema
+from models import UserModel, OrganisationModel, UserOrganisation
+from schemas import OrganisationSchema, AddUserToOrganisationSchema
 
 import uuid
 

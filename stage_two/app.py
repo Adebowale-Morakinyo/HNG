@@ -2,11 +2,11 @@ from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
-from stage_two.db import db
-from stage_two.blocklist import BLOCKLIST
-from stage_two.resources.user import blp as UserBlueprint
-from stage_two.resources.organisation import blp as OrganisationBlueprint
-from stage_two.config import Config
+from db import db
+from blocklist import BLOCKLIST
+from resources.user import blp as UserBlueprint
+from resources.organisation import blp as OrganisationBlueprint
+from config import Config
 
 
 def create_app():
@@ -43,7 +43,7 @@ def create_app():
         return jsonify({"message": "The token has been revoked.", "error": "token_revoked"}), 401
 
     with app.app_context():
-        import stage_two.models  # noqa: F401
+        import models  # noqa: F401
         db.create_all()
 
     api.register_blueprint(UserBlueprint)

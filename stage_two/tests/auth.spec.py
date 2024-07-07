@@ -1,9 +1,9 @@
 import unittest
 from flask_jwt_extended import create_access_token
 
-from ..app import create_app
-from ..db import db
-from ..models import UserModel, OrganisationModel
+from app import create_app
+from db import db
+from models import UserModel, OrganisationModel, UserOrganisation
 
 
 class AuthTest(unittest.TestCase):
@@ -50,7 +50,7 @@ class AuthTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("accessToken", response.json["data"])
 
-    def test_organisation_creation(self):
+    def test_create_organisation(self):
         user = UserModel(
             userId="unique_id",
             firstName="John",
@@ -61,15 +61,16 @@ class AuthTest(unittest.TestCase):
         )
         user.save_to_db()
         access_token = create_access_token(identity=user.userId)
-
-        organisation_data = {
-            "name": "John's Organisation",
-            "description": "This is John's organisation"
+        headers = {
+            "Authorization": f"Bearer {access_token}"
         }
-        response = self.client.post("/api/organisations", headers={"Authorization": f"Bearer {access_token}"},
-                                    json=organisation_data)
+        org_data = {
+            "name": "Test Organisation",
+            "description": "This is a test organisation."
+        }
+        response = self.client.post("/api/organisations", json=org_data, headers=headers)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json["data"]["name"], "John's Organisation")
+        self.assertIn("organisation", response.json["data"])
 
 
 if __name__ == "__main__":

@@ -1,3 +1,3 @@
-from .user import UserSchema, UserRegisterSchema, UserLoginSchema
-from .organisation import OrganisationSchema
-from .user_organisation import AddUserToOrganisationSchema
+from schemas.user import UserSchema, UserRegisterSchema, UserLoginSchema
+from schemas.organisation import OrganisationSchema
+from schemas.user_organisation import AddUserToOrganisationSchema

@@ -4,4 +4,4 @@ Flask-JWT-Extended
 Flask-SQLAlchemy
 Marshmallow
 python-dotenv
-psycopg2-binary  
+psycopg2-binary

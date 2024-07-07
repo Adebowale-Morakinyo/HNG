@@ -19,11 +19,15 @@ class OrganisationList(MethodView):
         user = UserModel.find_by_id(current_user)
         if not user:
             abort(404, message="User not found.")
-        organisations = OrganisationModel.query.filter_by(user_id=user.userId).all()
+
+        # Get the organisations through the UserOrganisation model
+        user_organisations = UserOrganisation.query.filter_by(user_id=user.userId).all()
+        organisations = [uo.organisation for uo in user_organisations]
+
         return {
             "status": "success",
             "message": "Organisations retrieved successfully",
-            "data": {"organisations": organisations}
+            "data": {"organisations": [org.json() for org in organisations]}
         }
 
     @jwt_required()

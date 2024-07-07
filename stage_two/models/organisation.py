@@ -1,5 +1,6 @@
 from ..db import db
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 
 class OrganisationModel(db.Model):
@@ -8,6 +9,8 @@ class OrganisationModel(db.Model):
     orgId = Column(String, primary_key=True, unique=True)
     name = Column(String, nullable=False)
     description = Column(String)
+
+    users = relationship('UserOrganisation', backref='organisation', lazy=True)
 
     def json(self):
         return {

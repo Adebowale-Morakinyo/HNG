@@ -1,5 +1,6 @@
 from ..db import db
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 
 class UserModel(db.Model):
@@ -11,6 +12,8 @@ class UserModel(db.Model):
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     phone = Column(String)
+
+    organisations = relationship('UserOrganisation', backref='user', lazy=True)
 
     def json(self):
         return {
@@ -27,7 +30,7 @@ class UserModel(db.Model):
 
     @classmethod
     def find_by_id(cls, _id):
-        return cls.query.filter_by(id=_id).first()
+        return cls.query.filter_by(userId=_id).first()
 
     def save_to_db(self):
         db.session.add(self)

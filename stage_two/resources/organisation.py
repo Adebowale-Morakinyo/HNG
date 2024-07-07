@@ -2,9 +2,10 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app.models.organisation import OrganisationModel
-from app.models.user import UserModel
-from app.schemas.organisation import OrganisationSchema
+from ..models import UserModel, OrganisationModel
+from ..schemas import OrganisationSchema
+
+import uuid
 
 blp = Blueprint("Organisations", "organisations", description="Operations on organisations")
 

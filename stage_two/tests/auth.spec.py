@@ -1,10 +1,9 @@
 import unittest
 from flask_jwt_extended import create_access_token
 
-from app import create_app
-from app.db import db
-from app.models.user import UserModel
-from app.models.organisation import OrganisationModel
+from ..app import create_app
+from ..db import db
+from ..models import UserModel, OrganisationModel
 
 
 class AuthTest(unittest.TestCase):

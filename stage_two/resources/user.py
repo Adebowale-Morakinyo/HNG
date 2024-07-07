@@ -8,10 +8,9 @@ from flask_jwt_extended import (
 from passlib.hash import pbkdf2_sha256
 import uuid
 
-from app.models.user import UserModel
-from app.models.organisation import OrganisationModel
-from app.schemas.user import UserSchema, UserRegisterSchema, UserLoginSchema
-from app.blocklist import BLOCKLIST
+from ..models import UserModel, OrganisationModel
+from ..schemas import UserSchema, UserRegisterSchema, UserLoginSchema
+from ..blocklist import BLOCKLIST
 
 blp = Blueprint("Users", "users", description="Operations on users")
 
@@ -21,7 +20,7 @@ class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     @blp.response(201, UserSchema)
     def post(self, user_data):
-        if UserModel.find_by_username(user_data["email"]):
+        if UserModel.find_by_email(user_data["email"]):
             abort(400, message="A user with that email already exists.")
 
         user = UserModel(
@@ -49,7 +48,7 @@ class UserRegister(MethodView):
 class UserLogin(MethodView):
     @blp.arguments(UserLoginSchema)
     def post(self, user_data):
-        user = UserModel.find_by_username(user_data["email"])
+        user = UserModel.find_by_email(user_data["email"])
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             access_token = create_access_token(identity=user.userId)
             return {"accessToken": access_token}, 200
@@ -57,3 +56,12 @@ class UserLogin(MethodView):
         abort(401, message="Invalid credentials.")
 
 
+@blp.route("/api/users/string:user_id")
+class User(MethodView):
+    @jwt_required()
+    @blp.response(200, UserSchema)
+    def get(self, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            abort(404, message="User not found.")
+        return user

@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 Marshmallow
 python-dotenv
 psycopg2-binary
+passlib

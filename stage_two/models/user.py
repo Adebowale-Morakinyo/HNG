@@ -1,4 +1,4 @@
-from app.db import db
+from ..db import db
 from sqlalchemy import Column, String
 
 
@@ -22,8 +22,8 @@ class UserModel(db.Model):
         }
 
     @classmethod
-    def find_by_username(cls, username):
-        return cls.query.filter_by(username=username).first()
+    def find_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
 
     @classmethod
     def find_by_id(cls, _id):

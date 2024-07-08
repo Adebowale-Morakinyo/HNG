@@ -15,11 +15,6 @@ blp = Blueprint("Users", "users", description="Operations on users")
 class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     @blp.response(201, RegistrationResponseSchema)
-    def handle_validation_error(self, error, data, **kwargs):
-        # Customize the response based on the validation error
-        if error:
-            return {"status": "Bad request", "message": "Registration unsuccessful", "statusCode": 400}, 400
-
     def post(self, user_data):
         try:
             if UserModel.find_by_email(user_data["email"]):

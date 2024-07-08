@@ -42,26 +42,40 @@ class OrganisationList(MethodView):
     @blp.arguments(CreateOrganisationSchema)
     @blp.response(201, CreateOrganisationResponseSchema)
     def post(self, organisation_data):
-        current_user = get_jwt_identity()
-        user = UserModel.find_by_id(current_user)
-        if not user:
-            abort(404, message="User not found.")
+        try:
+            current_user = get_jwt_identity()
+            user = UserModel.find_by_id(current_user)
+            if not user:
+                abort(404, message="User not found.")
 
-        organisation = OrganisationModel(
-            orgId=str(uuid.uuid4()),
-            name=organisation_data["name"],
-            description=organisation_data.get("description", "")
-        )
-        organisation.save_to_db()
+            organisation = OrganisationModel(
+                orgId=str(uuid.uuid4()),
+                name=organisation_data["name"],
+                description=organisation_data.get("description", "")
+            )
+            organisation.save_to_db()
 
-        user_organisation = UserOrganisation(user_id=user.userId, org_id=organisation.orgId)
-        user_organisation.save_to_db()
+            user_organisation = UserOrganisation(user_id=user.userId, org_id=organisation.orgId)
+            user_organisation.save_to_db()
 
-        return {
-            "status": "success",
-            "message": "Organisation created successfully",
-            "data": organisation.json()
-        }, 201
+            return {
+                "status": "success",
+                "message": "Organisation created successfully",
+                "data": organisation.json()
+            }, 201
+
+        except ValidationError as err:
+            return {
+                "status": "Bad Request",
+                "message": "Client error",
+                "statusCode": 400
+            }, 400
+        except Exception as e:
+            return {
+                "status": "Bad Request",
+                "message": "Client error",
+                "statusCode": 400
+            }, 400
 
 
 @blp.route("/api/organisations/<string:org_id>")

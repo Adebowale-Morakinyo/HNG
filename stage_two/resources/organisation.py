@@ -20,7 +20,6 @@ class OrganisationList(MethodView):
         if not user:
             abort(404, message="User not found.")
 
-        # Get the organisations through the UserOrganisation model
         user_organisations = UserOrganisation.query.filter_by(user_id=user.userId).all()
         organisations = [uo.organisation for uo in user_organisations]
 
@@ -46,15 +45,14 @@ class OrganisationList(MethodView):
         )
         organisation.save_to_db()
 
-        # Add current user to the organisation
         user_organisation = UserOrganisation(user_id=user.userId, org_id=organisation.orgId)
         user_organisation.save_to_db()
 
         return {
             "status": "success",
             "message": "Organisation created successfully",
-            "data": organisation
-        }
+            "data": organisation.json()
+        }, 201
 
 
 @blp.route("/api/organisations/<string:org_id>")
@@ -100,15 +98,28 @@ class AddUserToOrganisation(MethodView):
     @jwt_required()
     @blp.arguments(AddUserToOrganisationSchema)
     def post(self, user_data, org_id):
+        current_user = get_jwt_identity()
+        current_user_model = UserModel.find_by_id(current_user)
+        if not current_user_model:
+            abort(404, message="Current user not found.")
+
         organisation = OrganisationModel.query.filter_by(orgId=org_id).first()
         if not organisation:
             abort(404, message="Organisation not found.")
 
-        user = UserModel.find_by_id(user_data["userId"])
-        if not user:
-            abort(404, message="User not found.")
+        current_user_org = UserOrganisation.query.filter_by(user_id=current_user, org_id=org_id).first()
+        if not current_user_org:
+            abort(403, message="You don't have permission to add users to this organisation.")
 
-        user_organisation = UserOrganisation(user_id=user.userId, org_id=organisation.orgId)
+        user_to_add = UserModel.find_by_id(user_data["userId"])
+        if not user_to_add:
+            abort(404, message="User to add not found.")
+
+        existing_user_org = UserOrganisation.query.filter_by(user_id=user_to_add.userId, org_id=org_id).first()
+        if existing_user_org:
+            return {"status": "success", "message": "User is already in this organisation"}, 200
+
+        user_organisation = UserOrganisation(user_id=user_to_add.userId, org_id=organisation.orgId)
         user_organisation.save_to_db()
 
         return {"status": "success", "message": "User added to organisation successfully"}, 200

@@ -92,17 +92,20 @@ class User(MethodView):
     @jwt_required()
     @blp.response(200, UserSchema)
     def get(self, user_id):
+        current_user = get_jwt_identity()
         user = UserModel.find_by_id(user_id)
         if not user:
             abort(404, message="User not found.")
+
+        # Check if the current user has access to this user's information
+        if current_user != user_id:
+            user_orgs = UserOrganisation.query.filter_by(user_id=current_user).all()
+            user_org_ids = [uo.org_id for uo in user_orgs]
+            if not UserOrganisation.query.filter_by(user_id=user_id, org_id__in=user_org_ids).first():
+                abort(403, message="You don't have permission to access this user's information.")
+
         return {
             "status": "success",
             "message": "User retrieved successfully",
-            "data": {
-                "userId": user.userId,
-                "firstName": user.firstName,
-                "lastName": user.lastName,
-                "email": user.email,
-                "phone": user.phone,
-            }
+            "data": user.json()
         }

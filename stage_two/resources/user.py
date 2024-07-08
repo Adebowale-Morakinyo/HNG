@@ -1,16 +1,11 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from flask_jwt_extended import (
-    create_access_token,
-    jwt_required,
-    get_jwt_identity,
-)
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from passlib.hash import pbkdf2_sha256
 import uuid
 
 from models import UserModel, OrganisationModel, UserOrganisation
-from schemas import UserSchema, UserRegisterSchema, UserLoginSchema
-from blocklist import BLOCKLIST
+from schemas import UserSchema, UserRegisterSchema, UserLoginSchema, RegistrationResponseSchema, LoginResponseSchema
 
 blp = Blueprint("Users", "users", description="Operations on users")
 
@@ -18,7 +13,7 @@ blp = Blueprint("Users", "users", description="Operations on users")
 @blp.route("/auth/register")
 class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
-    @blp.response(201, UserSchema)
+    @blp.response(201, RegistrationResponseSchema)
     def post(self, user_data):
         if UserModel.find_by_email(user_data["email"]):
             return {"status": "Bad request", "message": "Registration unsuccessful", "statusCode": 400}, 400
@@ -65,6 +60,7 @@ class UserRegister(MethodView):
 @blp.route("/auth/login")
 class UserLogin(MethodView):
     @blp.arguments(UserLoginSchema)
+    @blp.response(200, LoginResponseSchema)
     def post(self, user_data):
         user = UserModel.find_by_email(user_data["email"])
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
@@ -107,5 +103,11 @@ class User(MethodView):
         return {
             "status": "success",
             "message": "User retrieved successfully",
-            "data": user.json()
+            "data": {
+                "userId": user.userId,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "email": user.email,
+                "phone": user.phone
+            }
         }

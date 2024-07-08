@@ -6,7 +6,6 @@ class UserSchema(Schema):
     firstName = fields.Str(required=True)
     lastName = fields.Str(required=True)
     email = fields.Email(required=True)
-    password = fields.Str(load_only=True, required=True)
     phone = fields.Str()
 
 
@@ -21,3 +20,15 @@ class UserRegisterSchema(Schema):
 class UserLoginSchema(Schema):
     email = fields.Email(required=True)
     password = fields.Str(load_only=True, required=True)
+
+
+class RegistrationResponseSchema(Schema):
+    status = fields.Str(required=True)
+    message = fields.Str(required=True)
+    data = fields.Nested(Schema, required=True)
+
+
+class LoginResponseSchema(Schema):
+    status = fields.Str(required=True)
+    message = fields.Str(required=True)
+    data = fields.Nested(Schema, required=True)

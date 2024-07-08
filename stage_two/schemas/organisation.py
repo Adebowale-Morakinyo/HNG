@@ -10,15 +10,15 @@ class OrganisationSchema(Schema):
 class OrganisationResponseSchema(Schema):
     status = fields.Str(required=True)
     message = fields.Str(required=True)
-    data = fields.Nested(OrganisationSchema)
+    data = fields.Nested(OrganisationSchema, required=True)
 
 
 class OrganisationListResponseSchema(Schema):
     status = fields.Str(required=True)
     message = fields.Str(required=True)
     data = fields.Nested(Schema.from_dict({
-        "organisations": fields.List(fields.Nested(OrganisationSchema))
-    }))
+        "organisations": fields.List(fields.Nested(OrganisationSchema, required=True))
+    }), required=True)
 
 
 class CreateOrganisationSchema(Schema):
@@ -29,4 +29,4 @@ class CreateOrganisationSchema(Schema):
 class CreateOrganisationResponseSchema(Schema):
     status = fields.Str(required=True)
     message = fields.Str(required=True)
-    data = fields.Nested(OrganisationSchema)
+    data = fields.Nested(OrganisationSchema, required=True)
